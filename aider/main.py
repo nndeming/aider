@@ -7,6 +7,7 @@ import traceback
 import webbrowser
 from dataclasses import fields
 from pathlib import Path
+from typing import Any
 
 try:
     import git
@@ -60,9 +61,9 @@ def check_config_files_for_yes(config_files):
 def get_git_root():
     """Try and guess the git repo, since the conf.yml can be at the repo root"""
     try:
-        repo = git.Repo(search_parent_directories=True)
+        repo = git.Repo(search_parent_directories=True)  # pyright: ignore[reportOptionalMemberAccess]
         return repo.working_tree_dir
-    except (git.InvalidGitRepositoryError, FileNotFoundError):
+    except (git.InvalidGitRepositoryError, FileNotFoundError):  # pyright: ignore[reportOptionalMemberAccess]
         return None
 
 
@@ -87,7 +88,7 @@ def guessed_wrong_repo(io, git_root, fnames, git_dname):
 
 def make_new_repo(git_root, io):
     try:
-        repo = git.Repo.init(git_root)
+        repo = git.Repo.init(git_root)  # pyright: ignore[reportOptionalMemberAccess]
         check_gitignore(git_root, io, False)
     except ANY_GIT_ERROR as err:  # issue #1233
         io.tool_error(f"Unable to create git repo in {git_root}")
@@ -130,12 +131,12 @@ def setup_git(git_root, io):
 
     try:
         user_name = repo.git.config("--get", "user.name") or None
-    except git.exc.GitCommandError:
+    except git.exc.GitCommandError:  # pyright: ignore[reportAttributeAccessIssue]
         user_name = None
 
     try:
         user_email = repo.git.config("--get", "user.email") or None
-    except git.exc.GitCommandError:
+    except git.exc.GitCommandError:  # pyright: ignore[reportAttributeAccessIssue]
         user_email = None
 
     if user_name and user_email:
@@ -157,7 +158,7 @@ def check_gitignore(git_root, io, ask=True):
         return
 
     try:
-        repo = git.Repo(git_root)
+        repo = git.Repo(git_root)  # pyright: ignore[reportOptionalMemberAccess]
         patterns_to_add = []
 
         if not repo.ignored(".aider"):
@@ -521,8 +522,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
         os.environ["SSL_VERIFY"] = ""
         litellm._load_litellm()
-        litellm._lazy_module.client_session = httpx.Client(verify=False)
-        litellm._lazy_module.aclient_session = httpx.AsyncClient(verify=False)
+        litellm._lazy_module.client_session = httpx.Client(verify=False)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+        litellm._lazy_module.aclient_session = httpx.AsyncClient(verify=False)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
         # Set verify_ssl on the model_info_manager
         models.model_info_manager.set_verify_ssl(False)
 
@@ -1169,7 +1170,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             if hasattr(switch, "placeholder") and switch.placeholder is not None:
                 io.placeholder = switch.placeholder
 
-            kwargs = dict(io=io, from_coder=coder)
+            kwargs: dict[str, Any] = dict(io=io, from_coder=coder)
             kwargs.update(switch.kwargs)
             if "show_announcements" in kwargs:
                 del kwargs["show_announcements"]

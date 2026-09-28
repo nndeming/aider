@@ -355,7 +355,7 @@ class Model(ModelSettings):
         max_input_tokens = self.info.get("max_input_tokens") or 0
         # Calculate max_chat_history_tokens as 1/16th of max_input_tokens,
         # with minimum 1k and maximum 8k
-        self.max_chat_history_tokens = min(max(max_input_tokens / 16, 1024), 8192)
+        self.max_chat_history_tokens = int(min(max(max_input_tokens / 16, 1024), 8192))
 
         self.configure_model_settings(model)
         if weak_model is False:
